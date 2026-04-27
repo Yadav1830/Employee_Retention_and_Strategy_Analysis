@@ -75,22 +75,82 @@ page = st.sidebar.radio(
 # =====================================================
 
 if page == "Summary & KPIs":
+    st.markdown("""
+<div style='background: linear-gradient(90deg,#14B8A6,#22C55E);
+            padding:11px;
+            border-radius:10px;
+            text-align:left;
+            color:black;
+            font-size:30px;
+            font-weight:900;
+            background-color:#245B4E;
+            margin-bottom:20px;'>
 
-    st.title("Employee Retention Strategy Analysis Dashboard")
+<b>Employee Retention Strategy Analysis Dashboard</b>
+
+</div>
+""", unsafe_allow_html=True)
+    st.markdown("""
+<div style='background: linear-gradient(90deg,#14B8A6,#22C55E);;
+            padding:10px;
+            border-radius:8px;
+            text-align:left;
+            color:black;
+            font-size:22px;
+            font-weight:600'>
+Employee Summary & Key Metrics
+</div>
+""", unsafe_allow_html=True)
+
+    
 
     total_emp = len(filtered_df)
     left_emp = filtered_df["Attrition"].sum()
     attrition_rate = round(left_emp/total_emp*100,2)
+    
+    st.markdown("""
+<style>
 
-    col1,col2,col3 = st.columns(3)
+/* KPI CARD */
+[data-testid="stMetric"] {
+background-color:#0F172A;
+justify-content:center;              
+border-radius: 10px;
+padding: 15px;
+border: 1px solid #14B8A6;
+text-align: center !important;
+box-shadow: 0px 4px 12px rgba(0,0,0,0.6);
+}
+
+/* KPI LABEL */
+[data-testid="stMetricLabel"] {
+color:#14B8A6;
+font-weight: 600;
+font-size: 16px;
+}
+
+/* KPI VALUE */
+[data-testid="stMetricValue"] {
+color:#E8F5E9;
+font-size: 34px;
+font-weight: bold;
+}
+
+</style>
+""", unsafe_allow_html=True)
+    employees_stayed = total_emp - left_emp
+    col1,col2,col3,col4 = st.columns(4)
 
     col1.metric("Total Employees", total_emp)
     col2.metric("Employees Left", left_emp)
-    col3.metric("Attrition Rate %", attrition_rate)
+    col3.metric("Employees Stayed", employees_stayed)
+    col4.metric("Attrition Rate", f"{attrition_rate}%")
+    
 
     st.subheader("Summary Statistics")
 
     st.dataframe(filtered_df.describe())
+
 
     st.subheader("Dataset Preview")
     st.dataframe(filtered_df.head())
@@ -101,11 +161,19 @@ if page == "Summary & KPIs":
 
 elif page == "Visualizations":
 
-    st.title("Attrition Analysis Visualizations")
+    #st.title("Attrition Analysis Visualizations")
 
     # Q1 Attrition percentage
-    st.subheader("Q1: What Percentage of Employees Leave the Company?")
-
+    
+    st.markdown(
+"""
+<h3 style='color:#14B8A6'>
+Q1: What Percentage of Employees Leave the Company?
+</h3>
+""",
+unsafe_allow_html=True
+)
+    
     # Count employees
     attr = filtered_df["Attrition"].value_counts().reset_index()
     attr.columns = ["Attrition","Count"]
@@ -120,17 +188,27 @@ elif page == "Visualizations":
        values="Count",
        hole=0.5,
        color="Attrition",
-       title="Employee Attrition Distribution"
+       title="Employee Attrition Distribution",
+       color_discrete_sequence=["#14B8A6","#22C55E","#4ADE80"]
     )
 
     fig.update_traces(textposition='inside', textinfo='percent+label')
-
+    fig.update_layout(template="plotly_white")
+    
     st.plotly_chart(fig, use_container_width=True)
-    st.markdown("**Insight:** This chart shows the proportion of employees who stayed versus those who left the company. " \
+    st.success("**Insight:** This chart shows the proportion of employees who stayed versus those who left the company. " \
     "A higher percentage of employees leaving indicates potential retention challenges.")
-
+    
+    
     # Q2 Department attrition
-    st.subheader("Q2: Which Department Has the Highest Attrition?")
+    st.markdown(
+"""
+<h3 style='color:#14B8A6'>
+Q2: Which Department Has the Highest Attrition?
+</h3>
+""",
+unsafe_allow_html=True
+)
 
     # Calculate attrition percentage by department
     dept = filtered_df.groupby("Department")["Attrition"].mean().reset_index()
@@ -143,18 +221,26 @@ elif page == "Visualizations":
      y="Attrition",
      color="Department",
      text=dept["Attrition"].round(1),
-     title="Attrition Rate by Department (%)"
+     title="Attrition Rate by Department (%)",
+     color_discrete_sequence=["#14B8A6","#22C55E","#4ADE80"]
     )
 
     fig.update_layout(yaxis_title="Attrition Rate (%)")
-
+    fig.update_layout(template="plotly_white")
     st.plotly_chart(fig, use_container_width=True)
 
-    st.info("Insight: This chart highlights which department experiences the highest employee attrition, " \
+    st.success("Insight: This chart highlights which department experiences the highest employee attrition, " \
     "helping HR identify departments where retention strategies are most needed.")
     
     # Q3 Salary vs attrition
-    st.subheader("Q3: Does Salary Affect Attrition?")
+    st.markdown(
+"""
+<h3 style='color:#14B8A6'>
+Q3: Does Salary Affect Attrition?
+</h3>
+""",
+unsafe_allow_html=True
+)
 
     # Calculate average salary by attrition
     salary = filtered_df.groupby("Attrition")["MonthlyIncome"].mean().reset_index()
@@ -167,21 +253,29 @@ elif page == "Visualizations":
      y="MonthlyIncome",
      color="Attrition",
      text=salary["MonthlyIncome"].round(0),
-     title="Average Salary of Employees Who Stayed vs Left"
+     title="Average Salary of Employees Who Stayed vs Left",
+     color_discrete_sequence=["#14B8A6","#22C55E","#4ADE80"]
     )
 
     fig.update_layout(
      yaxis_title="Average Monthly Income",
      xaxis_title="Employee Status"
     )
-
+    fig.update_layout(template="plotly_white")
     st.plotly_chart(fig, use_container_width=True)
 
-    st.info("Insight: Employees who left the company tend to have lower average salaries compared to those who stayed, " \
+    st.success("Insight: Employees who left the company tend to have lower average salaries compared to those who stayed, " \
     "indicating salary may influence attrition.")
 
     # Q4 Overtime effect
-    st.subheader("Q4: Does Overtime Increase Attrition?")
+    st.markdown(
+"""
+<h3 style='color:#14B8A6'>
+Q4: Does Overtime Increase Attrition?
+</h3>
+""",
+unsafe_allow_html=True
+)
 
     # Calculate attrition rate by overtime
     overtime_attr = filtered_df.groupby("OverTime")["Attrition"].mean().reset_index()
@@ -193,20 +287,28 @@ elif page == "Visualizations":
      y="Attrition",
      color="OverTime",
      text=overtime_attr["Attrition"].round(1),
-     title="Attrition Rate for Employees Working Overtime (%)"
+     title="Attrition Rate for Employees Working Overtime (%)",
+     color_discrete_sequence=["#14B8A6","#22C55E","#4ADE80"]
     )
 
     fig.update_layout(
      xaxis_title="Overtime",
      yaxis_title="Attrition Rate (%)"
     )
-
+    fig.update_layout(template="plotly_white")
     st.plotly_chart(fig, use_container_width=True)
-    st.info("Insight: Employees who work overtime tend to have a higher attrition rate compared to those who do not work overtime, " \
+    st.success("Insight: Employees who work overtime tend to have a higher attrition rate compared to those who do not work overtime, " \
     "indicating workload may influence employee turnover.")
 
     # Q5 Age group attrition
-    st.subheader("Q5: Which Age Group Has the Highest Attrition?")
+    st.markdown(
+"""
+<h3 style='color:#14B8A6'>
+Q5: Which Age Group Leaves the Most?
+</h3>
+""",
+unsafe_allow_html=True
+)
 
    # Calculate attrition rate by age group
     age_attr = filtered_df.groupby("AgeGroup")["Attrition"].mean().reset_index()
@@ -224,7 +326,8 @@ elif page == "Visualizations":
      y="Attrition",
      color="AgeGroup",
      text=age_attr["Attrition"].round(1),
-     title="Attrition Rate by Age Group (%)"
+     title="Attrition Rate by Age Group (%)",
+     color_discrete_sequence=["#14B8A6","#22C55E","#4ADE80"]
     )
 
     fig.update_layout(
@@ -233,12 +336,18 @@ elif page == "Visualizations":
     )
 
     st.plotly_chart(fig, use_container_width=True)
-    st.info("Insight: The chart shows which age group experiences the highest attrition. " \
+    st.success("Insight: The chart shows which age group experiences the highest attrition. " \
     "Younger employees often show higher attrition as they tend to explore better career opportunities.")
 
     # Q6 Distance from home
-    st.subheader("Q6: Does Distance from Home Influence Attrition?")
-
+    st.markdown(
+"""
+<h3 style='color:#14B8A6'>
+Q6: Does Distance From Home Influence Attrition?
+</h3>
+""",
+unsafe_allow_html=True
+)
     # Calculate average distance
     distance = filtered_df.groupby("Attrition")["DistanceFromHome"].mean().reset_index()
 
@@ -250,21 +359,29 @@ elif page == "Visualizations":
      y="DistanceFromHome",
      color="Attrition",
      text=distance["DistanceFromHome"].round(1),
-     title="Average Distance from Home: Stayed vs Left"
+     title="Average Distance from Home: Stayed vs Left",
+     color_discrete_sequence=["#14B8A6","#22C55E","#4ADE80"]
     )
 
     fig.update_layout(
      xaxis_title="Employee Status",
      yaxis_title="Average Distance from Home"
     )
-
+    fig.update_layout(template="plotly_white")
     st.plotly_chart(fig, use_container_width=True)
 
-    st.info("Insight: Employees who live farther from the workplace tend to show slightly higher attrition, " \
+    st.success("Insight: Employees who live farther from the workplace tend to show slightly higher attrition, " \
     "suggesting commute distance may influence employee retention.")
 
     # Q7 Job Satisfaction
-    st.subheader("Q7: Does Job Satisfaction Affect Attrition?")
+    st.markdown(
+"""
+<h3 style='color:#14B8A6'>
+Q7: Does Job Satisfaction Affect Employee Attrition?
+</h3>
+""",
+unsafe_allow_html=True
+)
 
     # Calculate attrition rate
     job_sat = filtered_df.groupby("JobSatisfaction")["Attrition"].mean().reset_index()
@@ -284,21 +401,29 @@ elif page == "Visualizations":
      y="Attrition",
      color="JobSatisfaction",
      text=job_sat["Attrition"].round(1),
-     title="Attrition Rate by Job Satisfaction Level (%)"
+     title="Attrition Rate by Job Satisfaction Level (%)",
+     color_discrete_sequence=["#14B8A6","#22C55E","#4ADE80"]
     )
 
     fig.update_layout(
      xaxis_title="Job Satisfaction Level",
      yaxis_title="Attrition Rate (%)"
     )
-
+    fig.update_layout(template="plotly_white")
     st.plotly_chart(fig, use_container_width=True)
 
-    st.info("Insight: Employees with lower job satisfaction levels tend to have higher attrition rates, " \
+    st.success("Insight: Employees with lower job satisfaction levels tend to have higher attrition rates, " \
     "indicating that improving employee satisfaction may help reduce turnover.")
 
     # Q8 Work Life Balance
-    st.subheader("Q8: Does Work Life Balance Affect Attrition?")
+    st.markdown(
+"""
+<h3 style='color:#14B8A6'>
+Q8: Does Work Life Balance Affect Employee Retention?
+</h3>
+""",
+unsafe_allow_html=True
+)
 
     wlb = filtered_df.groupby("WorkLifeBalance")["Attrition"].mean().reset_index()
     wlb["Attrition"] = wlb["Attrition"] * 100
@@ -317,21 +442,29 @@ elif page == "Visualizations":
     y="Attrition",
     color="WorkLifeBalance",
     text=wlb["Attrition"].round(1),
-    title="Attrition Rate by Work Life Balance (%)"
+    title="Attrition Rate by Work Life Balance (%)",
+    color_discrete_sequence=["#14B8A6","#22C55E","#4ADE80"]
     )
 
     fig.update_layout(
     xaxis_title="Work Life Balance Level",
     yaxis_title="Attrition Rate (%)"
    )
-
+    fig.update_layout(template="plotly_white")
     st.plotly_chart(fig, use_container_width=True)
 
-    st.info("Insight: Employees with poor work life balance show higher attrition, " \
+    st.success("Insight: Employees with poor work life balance show higher attrition, " \
     "indicating that improving work life balance may help reduce employee turnover.")
 
     # Q9 Correlation
-    st.subheader("Q9: Key Factors Influencing Employee Attrition")
+    st.markdown(
+"""
+<h3 style='color:#14B8A6'>
+Q9: Correlation Between Factors Affecting Attrition
+</h3>
+""",
+unsafe_allow_html=True
+)
 
     # Select important numeric columns
     corr = filtered_df[[
@@ -353,21 +486,29 @@ elif page == "Visualizations":
     y=attrition_corr.index,
     orientation='h',
     color=attrition_corr.values,
-    title="Factors Correlated with Employee Attrition"
+    title="Factors Correlated with Employee Attrition",
+    color_discrete_sequence=["#14B8A6","#22C55E","#4ADE80"]
     )
 
     fig.update_layout(
     xaxis_title="Correlation Strength",
     yaxis_title="Factors"
     )
-
+    fig.update_layout(template="plotly_white")
     st.plotly_chart(fig, use_container_width=True)
 
-    st.info("Insight: Factors such as job satisfaction, work-life balance, "
+    st.success("Insight: Factors such as job satisfaction, work-life balance, "
     "and environment satisfaction show stronger relationships with employee attrition compared to demographic variables.")
 
     # Q10 Key Factors
-    st.subheader("Q10 Key Factors Affecting Attrition")
+    st.markdown(
+"""
+<h3 style='color:#14B8A6'>
+Q10: Key Factore affecting Attrition
+</h3>
+""",
+unsafe_allow_html=True
+)
 
     factors = filtered_df.groupby("Attrition")[[
         "MonthlyIncome",
